@@ -6,6 +6,8 @@ import com.velasquez.taskapi.model.SaveRequest;
 import com.velasquez.taskapi.repository.TaskRepository;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 // why rest and not just reg controller? its  rest api, gives json functionality
 
@@ -30,7 +32,8 @@ public class TaskController {
 
     @PutMapping("/tasks/{taskId}")
     public void completeTask(@PathVariable String taskId) {
-        Task task = taskRepository.findById(taskId).get();      // null - NPE null pointer exception
+        Optional<Task> optionalTask = taskRepository.findById(taskId);
+        Task task = optionalTask.get();      // null - NPE null pointer exception
         task.setCompleted(!task.isCompleted());
 
         taskRepository.save(task);

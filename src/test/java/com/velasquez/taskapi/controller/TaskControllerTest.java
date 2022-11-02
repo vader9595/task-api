@@ -4,6 +4,7 @@ import com.velasquez.taskapi.entity.Task;
 import com.velasquez.taskapi.repository.TaskRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +14,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -35,7 +40,7 @@ class TaskControllerTest {
 
     @Test
     void returnsAllTasks() throws Exception {
-        Mockito.when(mockRepository.findAll())
+        when(mockRepository.findAll())
                 .thenReturn(List.of(new Task("Check the mail")));
 
         mockMvc.perform(get("/tasks"))
@@ -43,5 +48,20 @@ class TaskControllerTest {
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].name", is("Check the mail")))
                 .andExpect(jsonPath("$[0].completed", is(false)));
+    }
+
+    @Test
+    void completesTask() throws Exception {
+        Task task = new Task("123", "Check the mail");
+        when(mockRepository.findById("123"))
+                .thenReturn(Optional.of(task));
+
+        mockMvc.perform(put("/tasks/123"))
+                .andDo(print());
+
+        ArgumentCaptor<Task> argumentCaptor = ArgumentCaptor.forClass(Task.class);
+        verify(mockRepository).save(argumentCaptor.capture());
+
+        Assertions.assertThat(argumentCaptor.getValue()).isEqualTo(task);
     }
 }
