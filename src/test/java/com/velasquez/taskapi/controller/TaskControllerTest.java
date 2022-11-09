@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.eq;
@@ -62,6 +63,10 @@ class TaskControllerTest {
         ArgumentCaptor<Task> argumentCaptor = ArgumentCaptor.forClass(Task.class);
         verify(mockRepository).save(argumentCaptor.capture());
 
-        Assertions.assertThat(argumentCaptor.getValue()).isEqualTo(task);
+        Task updatedTask = argumentCaptor.getValue();
+
+        assertThat(updatedTask.getId()).isEqualTo("123");
+        assertThat(updatedTask.getName()).isEqualTo("Check the mail");
+        assertThat(updatedTask.isCompleted()).isTrue();
     }
 }
